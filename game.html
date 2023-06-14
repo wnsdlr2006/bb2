@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-image: url("images/game.png"); /* 배경 이미지 파일 경로 */
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+
+    #game-container {
+      width: 690px;
+      height: 690px;
+      position: relative;
+      border: 1px solid #000;
+      overflow: hidden; /* 추가된 스타일: 컨테이너 내부 요소들을 넘어가는 부분을 숨김 */
+    }
+
+    #player {
+      width: 90px;
+      height: 90px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      background-image: url("images/dot2.png"); /* 플레이어 이미지 파일 경로 */
+      background-size: cover;
+    }
+
+    .obstacle {
+      width: 90px;
+      height: 90px;
+      position: absolute;
+      background-image: url("images/dot1.png"); /* 장애물 이미지 파일 경로 */
+      background-size: cover;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="player"></div>
+  </div>
+
+  <script>
+    // 키 입력 감지
+    document.addEventListener("keydown", movePlayer);
+
+    // 플레이어 위치 초기화
+    let playerX = 0;
+    const containerWidth = 690; // 게임 컨테이너의 너비
+    const playerWidth = 90; // 플레이어의 너비
+
+    function movePlayer(e) {
+      const player = document.getElementById("player");
+      if (e.key === "ArrowLeft" && playerX > 0) {
+        playerX -= 60;
+      } else if (e.key === "ArrowRight" && playerX < containerWidth - playerWidth) {
+        playerX += 60;
+      }
+      player.style.left = playerX + "px";
+    }
+
+    function createObstacle() {
+      const obstacle = document.createElement("div");
+      obstacle.classList.add("obstacle");
+      const gameContainer = document.getElementById("game-container");
+      const obstacleX = Math.floor(Math.random() * (containerWidth - playerWidth)); // 플레이어 크기 고려
+      obstacle.style.left = obstacleX + "px";
+      gameContainer.appendChild(obstacle);
+
+      let obstacleInterval = setInterval(() => {
+        const currentTop = obstacle.offsetTop;
+        obstacle.style.top = currentTop + 60 + "px";
+
+        // 장애물과 플레이어 충돌 체크
+        if (isCollision(obstacle)) {
+          clearInterval(obstacleInterval);
+          alert("게임 오버!");
+          location.reload();
+        }
+
+        // 게임 화면에서 장애물 제거
+        if (currentTop > 1200) {
+          clearInterval(obstacleInterval);
+          gameContainer.removeChild(obstacle);
+        }
+      }, 100);
+    }
+
+    // 장애물 생성 및 이동
+    setInterval(createObstacle, 800);
+    
+    function isCollision(obstacle) {
+      const player = document.getElementById("player");
+      const playerLeft = player.offsetLeft;
+      const playerRight = playerLeft + player.offsetWidth;
+      const playerTop = player.offsetTop;
+      const playerBottom = playerTop + player.offsetHeight;
+
+      const obstacleLeft = obstacle.offsetLeft;
+      const obstacleRight = obstacleLeft + obstacle.offsetWidth;
+      const obstacleTop = obstacle.offsetTop;
+      const obstacleBottom = obstacleTop + obstacle.offsetHeight;
+
+      return (
+        playerRight > obstacleLeft &&
+        playerLeft < obstacleRight &&
+        playerTop < obstacleBottom &&
+        playerBottom > obstacleTop
+      );
+    }
+  </script>
+</body>
+</html>
+
+
